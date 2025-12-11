@@ -182,11 +182,11 @@ app.post("/auth/logout", authenticateToken, (req, res) => {
   return res.json({ message: 'Logged out successfully' });
 });
 
-app.get("/trips", (req, res) => {
+app.get("/trips", authenticateToken, (req, res) => {
   return res.json(trips);
 });
 
-app.post("/trips", (req, res) => {
+app.post("/trips", authenticateToken, (req, res) => {
   const payload = req.body || {};
   const id = uuidv4();
   const newTrip = {
@@ -205,7 +205,7 @@ app.post("/trips", (req, res) => {
   return res.status(201).json(newTrip);
 });
 
-app.post("/trips/:id/photos", (req, res) => {
+app.post("/trips/:id/photos", authenticateToken, (req, res) => {
   const { id } = req.params;
   const { uri } = req.body || {};
   const idx = trips.findIndex(t => t.id === id);
