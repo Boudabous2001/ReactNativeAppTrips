@@ -1,0 +1,21 @@
+{
+    "common": {
+        "save": "Enregistrer",
+        "cancel": "Annuler",
+        "loading": "Chargement..."
+    },
+    "auth": {
+        "login": "Connexion",
+        "logout": "Déconnexion",
+        "email": "Email",
+        "password": "Mot de passe"
+    },
+    "home": {
+        "title": "Accueil",
+        "upcomingTrips": "Voyages à venir"
+    },
+    "trips": {
+        "title": "Voyages",
+        "all": "Tous"
+    }
+}

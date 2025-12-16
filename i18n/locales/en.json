@@ -1,0 +1,21 @@
+{
+    "common": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "loading": "Loading..."
+    },
+    "auth": {
+        "login": "Login",
+        "logout": "Logout",
+        "email": "Email",
+        "password": "Password"
+    },
+    "home": {
+        "title": "Home",
+        "upcomingTrips": "Upcoming Trips"
+    },
+    "trips": {
+        "title": "Trips",
+        "all": "All"
+    }
+}

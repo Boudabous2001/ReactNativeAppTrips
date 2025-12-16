@@ -1,136 +1,126 @@
-import { auth, LoginCredentials, RegisterData, User } from "@/services/auth";
-import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import { AuthResponse, User } from '@/types';
+import { config } from '@/utils/env';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter, useSegments } from 'expo-router';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 interface AuthContextType {
-    user: User | null;
-    isLoading: boolean;
-    isAuthenticated: boolean;
-    error: string | null;
-    login: (credentials: LoginCredentials) => Promise<{ user: User, tokens: any }>;
-    register: (data: RegisterData) => Promise<{ user: User, tokens: any }>;
-    logout: () => Promise<void>;
-    refreshAuth: () => Promise<void>;
+  user: User | null;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const segments = useSegments();
 
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
-    const checkAuth = useCallback(async () => {
-        try {
-            setIsLoading(true);
-            setError(null);
-            const state = await auth.getAuthState();
-            setUser(state.user);
-            setIsAuthenticated(state.isAuthenticated);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Auth check failed');
-            setIsAuthenticated(false);
-            setUser(null);
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
+  useEffect(() => {
+    if (loading) return;
 
-    useEffect(() => {
-        checkAuth();
-    }, []);
+    const inAuthGroup = segments[0] === '(tabs)';
 
-    const login = useCallback(async (credentials: LoginCredentials) => {
-        try {
-            setIsLoading(true);
-            setError(null);
-            const { user, tokens } = await auth.login(credentials);
-            await new Promise(resolve => setTimeout(resolve, 100));
-            const state = await auth.getAuthState();
+    if (!user && inAuthGroup) {
+      router.replace('/login');
+    } else if (user && !inAuthGroup && segments[0] !== 'modal') {
+      router.replace('/(tabs)');
+    }
+  }, [user, segments, loading]);
 
-            setUser(state.user);
-            setIsAuthenticated(state.isAuthenticated);
+  const checkAuth = async () => {
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      const userStr = await AsyncStorage.getItem('user');
+      
+      if (token && userStr) {
+        setUser(JSON.parse(userStr));
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            return { user, tokens };
+  const login = async (email: string, password: string) => {
+    try {
+      const response = await fetch(`${config.mockBackendUrl}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-        } catch (err) {
-            const message = err instanceof Error ? err.message : 'Login failed';
-            setError(message);
-            setIsAuthenticated(false);
-            setUser(null);
-            throw err;
-        } finally {
-            setIsLoading(false);
-        }
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Login failed');
+      }
 
-    }, []);
+      const data: AuthResponse = await response.json();
 
-    const register = useCallback(async (data: RegisterData) => {
-        try {
-            setIsLoading(true);
-            setError(null);
-            const { user, tokens } = await auth.register(data);
-            // Attendre un peu pour que SecureStore sauvegarde
-            await new Promise(resolve => setTimeout(resolve, 100));
-            // Vérifier l'état après sauvegarde
-            const state = await auth.getAuthState();
-            setUser(state.user);
-            setIsAuthenticated(state.isAuthenticated);
-            console.log('✅ [useAuth] Register completed, auth state:', state.isAuthenticated);
-            return { user, tokens };
-        } catch (err) {
-            const message = err instanceof Error ? err.message : 'Registration failed';
-            setError(message);
-            setIsAuthenticated(false);
-            setUser(null);
-            throw err;
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
+      await AsyncStorage.multiSet([
+        ['accessToken', data.accessToken],
+        ['refreshToken', data.refreshToken],
+        ['user', JSON.stringify(data.user)],
+      ]);
 
-    const logout = useCallback(async () => {
-        try {
-            setIsLoading(true);
-            setError(null);
-            await auth.logout();
-            setUser(null);
-            setIsAuthenticated(false);
-        } catch (err) {
-            const message = err instanceof Error ? err.message : 'Logout failed';
-            setError(message);
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
+      setUser(data.user);
+    } catch (error: any) {
+      throw new Error(error.message || 'Login failed');
+    }
+  };
 
-    const refreshAuth = useCallback(async () => {
-        await checkAuth();
-    }, []);
+  const register = async (name: string, email: string, password: string) => {
+    try {
+      const response = await fetch(`${config.mockBackendUrl}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
+      });
 
-    return (
-        <AuthContext.Provider
-            value={{
-                user,
-                isLoading,
-                isAuthenticated,
-                error,
-                login,
-                register,
-                logout,
-                refreshAuth
-            }}
-        >
-            {children}
-        </AuthContext.Provider>
-    );
-}
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Registration failed');
+      }
+
+      const data: AuthResponse = await response.json();
+
+      await AsyncStorage.multiSet([
+        ['accessToken', data.accessToken],
+        ['refreshToken', data.refreshToken],
+        ['user', JSON.stringify(data.user)],
+      ]);
+
+      setUser(data.user);
+    } catch (error: any) {
+      throw new Error(error.message || 'Registration failed');
+    }
+  };
+
+  const logout = async () => {
+    await AsyncStorage.multiRemove(['accessToken', 'refreshToken', 'user']);
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
 
 export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
-}
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
+};
