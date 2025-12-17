@@ -1,6 +1,5 @@
 import { config } from '@/utils/env';
-import * as SecureStore from 'expo-secure-store'
-import { use } from 'react';
+import * as SecureStore from 'expo-secure-store';
 
 export interface User {
     id: string;
@@ -263,21 +262,21 @@ export const auth = {
     },
 
     async logout(): Promise<void> {
-        try {
-            const tokens = await this.getTokens();
-            if (tokens) {
-                await fetch(`${config.mockBackendUrl}/auth/logout`, {
-                    method: 'POST',
-                    headers: { Authorization: `Bearer ${tokens.accessToken}` },
-                });
-            }
-        } catch (error) {
-            console.warn('Logout API Failed');
+    try {
+        const tokens = await this.getTokens();
+        if (tokens) {
+            await fetch(`${config.mockBackendUrl}/auth/logout`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${tokens.accessToken}` },
+            });
         }
+    } catch (error) {
+        console.warn('Logout API Failed');
+    }
 
-        await Promise.all([this.clearTokens, this.clearUser()]);
-
-    },
+    await this.clearTokens();
+    await this.clearUser();
+},
     async refreshTokens(): Promise<AuthTokens | null> {
         if (refreshPromise) return refreshPromise;
         refreshPromise = this._doRefresh();
@@ -369,7 +368,6 @@ export const auth = {
         return true;
     },
 
-    // Authenticated Fetch
     async fetch(url: string, options: RequestInit = {}): Promise<Response> {
         let tokens = await this.getTokens();
         if (!tokens) throw new Error('Not authenticated');

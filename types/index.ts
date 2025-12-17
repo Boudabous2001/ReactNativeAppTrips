@@ -22,6 +22,7 @@ export interface Trip {
   image?: string;
   description?: string;
   photos?: string[];
+  isFavorite?: boolean;  
   location?: {
     lat: number;
     lng: number;

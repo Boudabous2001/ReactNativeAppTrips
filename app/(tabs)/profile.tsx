@@ -1,22 +1,19 @@
-
 import { useAuth } from '@/contexts/auth-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Alert } from 'react-native';
-
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
     const router = useRouter();
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
+    
     const stats = [
         { label: 'Voyages', value: '12', icon: 'map-outline', colors: ['#a855f7', '#ec4899'] as const },
         { label: 'Photos', value: '250', icon: 'camera', colors: ['#3b82f6', '#06b6d4'] as const },
         { label: 'Favoris', value: '12', icon: 'heart-outline', colors: ['#ef4444', '#f43f5e'] as const }
-
     ];
-
 
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
@@ -26,19 +23,18 @@ export default function ProfileScreen() {
                     colors={['#a855f7', '#ec4899']}
                     style={styles.header}
                 >
-
                     <Text style={styles.headerTitle}>Profil</Text>
 
                     {/*Profile card*/}
-
                     <View style={styles.profileCard}>
                         <View style={styles.profileHeader}>
                             <View style={styles.avatar}>
                                 <Text style={styles.avatarEmoji}>😎​</Text>
                             </View>
                             <View style={styles.profileInfo}>
-                                <Text style={styles.profileName}>Odilon Hema</Text>
-                                <Text style={styles.profileEmail}>dummy@mail.com</Text>
+                                {/* ✅ Utilisation des vraies données */}
+                                <Text style={styles.profileName}>{user?.name || 'Utilisateur'}</Text>
+                                <Text style={styles.profileEmail}>{user?.email || 'email@example.com'}</Text>
                             </View>
                         </View>
                         {/*Stats*/}
@@ -53,7 +49,6 @@ export default function ProfileScreen() {
                                         </LinearGradient>
                                         <Text style={styles.statValue}>{stat.value}</Text>
                                         <Text style={styles.statLabel}>{stat.label}</Text>
-
                                     </View>
                                 ))
                             }
@@ -61,46 +56,50 @@ export default function ProfileScreen() {
                     </View>
                 </LinearGradient>
 
-
                 {/*Content*/}
                 <View style={styles.content}>
                     <TouchableOpacity
-                        style={styles.menuItem}
-                        onPress={async () => {
-                            Alert.alert(
-                                'Déconnexion',
-                                'Etes-vous sûr de vouloir vous déconecter ?',
-                                [
-                                    { text: 'Annuler', style: 'cancel' },
-                                    {
-                                        text: 'Déconnexion',
-                                        style: 'destructive',
-                                        onPress: async () => {
-                                            await logout();
-                                            router.replace('/login');
-                                        }
-                                    }
-                                ]
-                            )
-                        }}
-                    >
-                        <LinearGradient
-                            colors={['#ef4444', '#f43f5e']}
-                            style={styles.menuItemIcon}
-                        >
-                            <Ionicons name='log-out-outline' size={24} color='white' />
-                        </LinearGradient>
-                        <View>
-                            <Text style={styles.menuItemTitle}>Déconnexion</Text>
-                            <Text style={styles.menuItemSubTitle}>Se déconnecter de votre compte</Text>
-
-                        </View>
-                    </TouchableOpacity>
-                    
+    style={styles.menuItem}
+    onPress={() => {
+        console.log('🔴 Bouton déconnexion cliqué');
+        Alert.alert(
+            'Déconnexion',
+            'Êtes-vous sûr de vouloir vous déconnecter ?',
+            [
+                { text: 'Annuler', style: 'cancel' },
+                {
+                    text: 'Déconnexion',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            console.log('🔴 Tentative de déconnexion...');
+                            await logout();
+                            console.log('✅ Logout réussi');
+                            router.replace('/login');
+                        } catch (error) {
+                            console.error('❌ Erreur logout:', error);
+                            Alert.alert('Erreur', 'Impossible de se déconnecter');
+                        }
+                    }
+                }
+            ]
+        );
+    }}
+>
+    <LinearGradient
+        colors={['#ef4444', '#f43f5e']}
+        style={styles.menuItemIcon}
+    >
+        <Ionicons name='log-out-outline' size={24} color='white' />
+    </LinearGradient>
+    <View>
+        <Text style={styles.menuItemTitle}>Déconnexion</Text>
+        <Text style={styles.menuItemSubTitle}>Se déconnecter de votre compte</Text>
+    </View>
+</TouchableOpacity>
                 </View>
             </ScrollView>
         </SafeAreaView>
-
     )
 }
 
@@ -223,6 +222,4 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#6b7280'
     }
-
-
 });

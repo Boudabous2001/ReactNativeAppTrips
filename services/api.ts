@@ -57,6 +57,16 @@ class ApiService {
     return this.handleResponse<T>(response);
   }
 
+  async patch<T>(endpoint: string, data?: any): Promise<T> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${this.baseURL}${endpoint}`, {
+      method: 'PATCH',
+      headers,
+      body: data ? JSON.stringify(data) : undefined,
+    });
+    return this.handleResponse<T>(response);
+  }
+
   async uploadImage(uri: string): Promise<string> {
     const token = await AsyncStorage.getItem('accessToken');
     const formData = new FormData();
@@ -91,8 +101,16 @@ class ApiService {
     return this.get<Trip[]>('/trips');
   }
 
+  async getTripById(id: string): Promise<Trip> {
+    return this.get<Trip>(`/trips/${id}`);
+  }
+
   async createTrip(trip: Partial<Trip>): Promise<Trip> {
     return this.post<Trip>('/trips', trip);
+  }
+
+  async toggleFavorite(id: string): Promise<Trip> {
+    return this.patch<Trip>(`/trips/${id}/favorite`);
   }
 }
 

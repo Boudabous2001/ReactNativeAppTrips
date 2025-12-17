@@ -1,0 +1,76 @@
+[
+  {
+    "id": "1",
+    "title": "Voyage à Paris",
+    "destination": "Paris, France",
+    "startDate": "2024-12-20",
+    "endDate": "2024-12-30",
+    "description": "Découverte de la ville lumière",
+    "image": "paris",
+    "photos": []
+  },
+  {
+    "id": "2",
+    "title": "Tokyo Adventure",
+    "destination": "Tokyo, Japon",
+    "startDate": "2025-01-15",
+    "endDate": "2025-01-25",
+    "description": "Exploration du Japon moderne",
+    "image": "tokyo",
+    "photos": []
+  },
+  {
+    "id": "3",
+    "title": "Bali Relaxation",
+    "destination": "Bali, Indonésie",
+    "startDate": "2024-11-10",
+    "endDate": "2024-11-20",
+    "description": "Détente à Bali",
+    "image": "bali",
+    "photos": []
+  },
+  {
+    "title": "Test",
+    "destination": "Test",
+    "startDate": "22/01/2026",
+    "endDate": "30/01/2026",
+    "description": "Test",
+    "image": "file:///var/mobile/Containers/Data/Application/FB45F9E8-C595-4D23-9C6B-B25709A00855/Library/Caches/ExponentExperienceData/@anonymous/MyFirstApp-328857b8-cb57-434d-a790-e82926b73f6a/ImagePicker/6886FB38-2D13-4C77-A44F-7FD997AEFA2A.jpg",
+    "photos": [],
+    "id": "1765933208074",
+    "isFavorite": false
+  },
+  {
+    "title": "Test2",
+    "destination": "Test3",
+    "startDate": "2026-01-22",
+    "endDate": "2026-01-30",
+    "description": "Test",
+    "image": "paris",
+    "photos": [],
+    "id": "1765934050301",
+    "isFavorite": false
+  },
+  {
+    "title": "Test3",
+    "destination": "Test3",
+    "startDate": "2026-02-28",
+    "endDate": "2026-03-01",
+    "description": "Test3",
+    "image": "paris",
+    "photos": [],
+    "id": "1765934213272",
+    "isFavorite": false
+  },
+  {
+    "title": "Test3 ",
+    "destination": "Test3",
+    "startDate": "2026-09-09",
+    "endDate": "2026-09-28",
+    "description": "Test3",
+    "image": "paris",
+    "photos": [],
+    "id": "1765934295911",
+    "isFavorite": false
+  }
+]
