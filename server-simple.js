@@ -9,10 +9,8 @@ const __dirname = path.dirname(__filename);
 const PORT = process.env.PORT || 4000;
 const TRIPS_FILE = path.join(__dirname, 'data', 'trips.json');
 
-// Ensure data directory exists
 await fs.mkdir(path.join(__dirname, 'data'), { recursive: true }).catch(() => {});
 
-// Load trips from file
 let trips = [];
 try {
   const data = await fs.readFile(TRIPS_FILE, 'utf-8');

@@ -1,21 +1,77 @@
 {
     "common": {
-        "save": "Enregistrer",
+        "welcome": "Bienvenue",
+        "loading": "Chargement...",
+        "error": "Erreur",
+        "success": "Succès",
         "cancel": "Annuler",
-        "loading": "Chargement..."
+        "confirm": "Confirmer",
+        "save": "Enregistrer",
+        "delete": "Supprimer",
+        "edit": "Modifier",
+        "back": "Retour"
     },
     "auth": {
         "login": "Connexion",
+        "register": "Inscription",
         "logout": "Déconnexion",
         "email": "Email",
-        "password": "Mot de passe"
-    },
-    "home": {
-        "title": "Accueil",
-        "upcomingTrips": "Voyages à venir"
+        "password": "Mot de passe",
+        "name": "Nom",
+        "confirmPassword": "Confirmer le mot de passe",
+        "forgotPassword": "Mot de passe oublié ?",
+        "noAccount": "Pas de compte ?",
+        "hasAccount": "Déjà un compte ?",
+        "loginButton": "Se connecter",
+        "registerButton": "S'inscrire",
+        "errors": {
+            "invalidEmail": "Email invalide",
+            "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
+            "passwordMismatch": "Les mots de passe ne correspondent pas",
+            "loginFailed": "Échec de la connexion",
+            "registerFailed": "Échec de l'inscription"
+        }
     },
     "trips": {
-        "title": "Voyages",
-        "all": "Tous"
+        "title": "Mes Voyages",
+        "addTrip": "Ajouter un voyage",
+        "editTrip": "Modifier le voyage",
+        "deleteTrip": "Supprimer le voyage",
+        "tripDetails": "Détails du voyage",
+        "destination": "Destination",
+        "startDate": "Date de départ",
+        "endDate": "Date de retour",
+        "description": "Description",
+        "photos": "Photos",
+        "favorite": "Favori",
+        "addToFavorites": "Ajouter aux favoris",
+        "removeFromFavorites": "Retirer des favoris",
+        "tabs": {
+            "all": "Tous",
+            "upcoming": "À venir",
+            "past": "Passés",
+            "favorites": "Favoris"
+        },
+        "empty": {
+            "noTrips": "Aucun voyage",
+            "noFavorites": "Aucun favori",
+            "createFirst": "Créez votre premier voyage !"
+        },
+        "errors": {
+            "loadFailed": "Impossible de charger les voyages",
+            "createFailed": "Impossible de créer le voyage",
+            "updateFailed": "Impossible de mettre à jour le voyage",
+            "deleteFailed": "Impossible de supprimer le voyage"
+        }
+    },
+    "profile": {
+        "title": "Profil",
+        "settings": "Paramètres",
+        "language": "Langue",
+        "theme": "Thème",
+        "notifications": "Notifications",
+        "about": "À propos",
+        "version": "Version",
+        "logoutConfirm": "Êtes-vous sûr de vouloir vous déconnecter ?"
     }
 }

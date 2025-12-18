@@ -4,15 +4,18 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LanguageSelector } from '@/components/language-selector';
+import { useTranslation } from 'react-i18next';
 
 export default function ProfileScreen() {
     const router = useRouter();
+    const { t } = useTranslation();
     const { logout, user } = useAuth();
     
     const stats = [
-        { label: 'Voyages', value: '12', icon: 'map-outline', colors: ['#a855f7', '#ec4899'] as const },
-        { label: 'Photos', value: '250', icon: 'camera', colors: ['#3b82f6', '#06b6d4'] as const },
-        { label: 'Favoris', value: '12', icon: 'heart-outline', colors: ['#ef4444', '#f43f5e'] as const }
+        { label: t('profile.stats.trips'), value: '12', icon: 'map-outline', colors: ['#a855f7', '#ec4899'] as const },
+        { label: t('profile.stats.photos'), value: '250', icon: 'camera', colors: ['#3b82f6', '#06b6d4'] as const },
+        { label: t('profile.stats.favorites'), value: '12', icon: 'heart-outline', colors: ['#ef4444', '#f43f5e'] as const }
     ];
 
     return (
@@ -23,7 +26,7 @@ export default function ProfileScreen() {
                     colors={['#a855f7', '#ec4899']}
                     style={styles.header}
                 >
-                    <Text style={styles.headerTitle}>Profil</Text>
+                    <Text style={styles.headerTitle}>{t('profile.title')}</Text>
 
                     {/*Profile card*/}
                     <View style={styles.profileCard}>
@@ -32,7 +35,6 @@ export default function ProfileScreen() {
                                 <Text style={styles.avatarEmoji}>😎​</Text>
                             </View>
                             <View style={styles.profileInfo}>
-                                {/* ✅ Utilisation des vraies données */}
                                 <Text style={styles.profileName}>{user?.name || 'Utilisateur'}</Text>
                                 <Text style={styles.profileEmail}>{user?.email || 'email@example.com'}</Text>
                             </View>
@@ -58,45 +60,45 @@ export default function ProfileScreen() {
 
                 {/*Content*/}
                 <View style={styles.content}>
+                    {/* Sélecteur de Langue */}
+                    <LanguageSelector />
+
+                    {/* Déconnexion */}
                     <TouchableOpacity
-    style={styles.menuItem}
-    onPress={() => {
-        console.log('🔴 Bouton déconnexion cliqué');
-        Alert.alert(
-            'Déconnexion',
-            'Êtes-vous sûr de vouloir vous déconnecter ?',
-            [
-                { text: 'Annuler', style: 'cancel' },
-                {
-                    text: 'Déconnexion',
-                    style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            console.log('🔴 Tentative de déconnexion...');
-                            await logout();
-                            console.log('✅ Logout réussi');
-                            router.replace('/login');
-                        } catch (error) {
-                            console.error('❌ Erreur logout:', error);
-                            Alert.alert('Erreur', 'Impossible de se déconnecter');
-                        }
-                    }
-                }
-            ]
-        );
-    }}
->
-    <LinearGradient
-        colors={['#ef4444', '#f43f5e']}
-        style={styles.menuItemIcon}
-    >
-        <Ionicons name='log-out-outline' size={24} color='white' />
-    </LinearGradient>
-    <View>
-        <Text style={styles.menuItemTitle}>Déconnexion</Text>
-        <Text style={styles.menuItemSubTitle}>Se déconnecter de votre compte</Text>
-    </View>
-</TouchableOpacity>
+                        style={styles.menuItem}
+                        onPress={() => {
+                            Alert.alert(
+                                t('profile.logout'),
+                                t('profile.logoutConfirm'),
+                                [
+                                    { text: t('common.cancel'), style: 'cancel' },
+                                    {
+                                        text: t('profile.logout'),
+                                        style: 'destructive',
+                                        onPress: async () => {
+                                            try {
+                                                await logout();
+                                                router.replace('/login');
+                                            } catch (error) {
+                                                Alert.alert(t('common.error'), 'Impossible de se déconnecter');
+                                            }
+                                        }
+                                    }
+                                ]
+                            );
+                        }}
+                    >
+                        <LinearGradient
+                            colors={['#ef4444', '#f43f5e']}
+                            style={styles.menuItemIcon}
+                        >
+                            <Ionicons name='log-out-outline' size={24} color='white' />
+                        </LinearGradient>
+                        <View style={{ flex: 1 }}>
+                            <Text style={styles.menuItemTitle}>{t('profile.logout')}</Text>
+                            <Text style={styles.menuItemSubTitle}>{t('profile.logoutDescription')}</Text>
+                        </View>
+                    </TouchableOpacity>
                 </View>
             </ScrollView>
         </SafeAreaView>
@@ -219,7 +221,7 @@ const styles = StyleSheet.create({
         marginBottom: 4
     },
     menuItemSubTitle: {
-        fontSize: 16,
+        fontSize: 14,
         color: '#6b7280'
     }
 });

@@ -1,6 +1,6 @@
+import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/services/api';
 import { Trip } from '@/types';
-import { useCallback, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 
 export function useTrips() {
@@ -48,6 +48,17 @@ export function useTrips() {
     }
   }, []);
 
+  const toggleFavorite = useCallback(async (tripId: string) => {
+    try {
+      const updatedTrip = await api.toggleFavorite(tripId);
+      setTrips(prev => prev.map(t => t.id === tripId ? updatedTrip : t));
+      return updatedTrip;
+    } catch (error: any) {
+      Alert.alert('Erreur', 'Impossible de modifier le favori');
+      throw error;
+    }
+  }, []);
+
   useEffect(() => {
     loadTrips();
   }, [loadTrips]);
@@ -58,5 +69,6 @@ export function useTrips() {
     isRefreshing,
     refreshTrips,
     createTrip,
+    toggleFavorite,
   };
 }

@@ -1,21 +1,77 @@
 {
     "common": {
-        "save": "Save",
+        "welcome": "Welcome",
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
         "cancel": "Cancel",
-        "loading": "Loading..."
+        "confirm": "Confirm",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "back": "Back"
     },
     "auth": {
         "login": "Login",
+        "register": "Register",
         "logout": "Logout",
         "email": "Email",
-        "password": "Password"
-    },
-    "home": {
-        "title": "Home",
-        "upcomingTrips": "Upcoming Trips"
+        "password": "Password",
+        "name": "Name",
+        "confirmPassword": "Confirm Password",
+        "forgotPassword": "Forgot Password?",
+        "noAccount": "No account?",
+        "hasAccount": "Already have an account?",
+        "loginButton": "Sign In",
+        "registerButton": "Sign Up",
+        "errors": {
+            "invalidEmail": "Invalid email",
+            "passwordTooShort": "Password must be at least 6 characters",
+            "passwordMismatch": "Passwords do not match",
+            "loginFailed": "Login failed",
+            "registerFailed": "Registration failed"
+        }
     },
     "trips": {
-        "title": "Trips",
-        "all": "All"
+        "title": "My Trips",
+        "addTrip": "Add Trip",
+        "editTrip": "Edit Trip",
+        "deleteTrip": "Delete Trip",
+        "tripDetails": "Trip Details",
+        "destination": "Destination",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "description": "Description",
+        "photos": "Photos",
+        "favorite": "Favorite",
+        "addToFavorites": "Add to Favorites",
+        "removeFromFavorites": "Remove from Favorites",
+        "tabs": {
+            "all": "All",
+            "upcoming": "Upcoming",
+            "past": "Past",
+            "favorites": "Favorites"
+        },
+        "empty": {
+            "noTrips": "No trips",
+            "noFavorites": "No favorites",
+            "createFirst": "Create your first trip!"
+        },
+        "errors": {
+            "loadFailed": "Failed to load trips",
+            "createFailed": "Failed to create trip",
+            "updateFailed": "Failed to update trip",
+            "deleteFailed": "Failed to delete trip"
+        }
+    },
+    "profile": {
+        "title": "Profile",
+        "settings": "Settings",
+        "language": "Language",
+        "theme": "Theme",
+        "notifications": "Notifications",
+        "about": "About",
+        "version": "Version",
+        "logoutConfirm": "Are you sure you want to logout?"
     }
 }

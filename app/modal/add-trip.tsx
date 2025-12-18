@@ -1,34 +1,54 @@
-import { api } from '@/services/api';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  Platform,
-  ScrollView,
-  StyleSheet,
+  View,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  StyleSheet,
+  ScrollView,
+  Alert,
+  ActivityIndicator,
+  Platform,
 } from 'react-native';
+import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { api } from '@/services/api';
+import * as ImagePicker from 'expo-image-picker';
+import { Image } from 'expo-image';
+import { useTranslation } from 'react-i18next';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function AddTripModal() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState({
     title: '',
     destination: '',
-    startDate: '',
-    endDate: '',
+    startDate: new Date(),
+    endDate: new Date(),
     description: '',
   });
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const formatDate = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const formatDisplayDate = (date: Date): string => {
+    return date.toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  };
 
   const pickImage = async () => {
     if (Platform.OS === 'web') {
@@ -60,52 +80,51 @@ export default function AddTripModal() {
     }
   };
 
-const handleSubmit = async () => {
-  if (!form.title || !form.destination || !form.startDate || !form.endDate) {
-    Alert.alert('Erreur', 'Veuillez remplir tous les champs obligatoires');
-    return;
-  }
+  const handleSubmit = async () => {
+    if (!form.title || !form.destination) {
+      Alert.alert(t('common.error'), t('addTrip.validation.fillAllFields'));
+      return;
+    }
 
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-  if (!dateRegex.test(form.startDate) || !dateRegex.test(form.endDate)) {
-    Alert.alert('Erreur', 'Format de date invalide. Utilisez YYYY-MM-DD (ex: 2026-01-22)');
-    return;
-  }
+    // Validation dates
+    if (form.startDate > form.endDate) {
+      Alert.alert(t('common.error'), 'La date de fin doit être après la date de début');
+      return;
+    }
 
-  setIsLoading(true);
-  try {
-    console.log('🚀 Creating trip with:', form);
-    
-    const imageToUse = selectedImage && selectedImage.startsWith('http') 
-      ? selectedImage 
-      : 'paris';
+    setIsLoading(true);
+    try {
+      const imageToUse = selectedImage && selectedImage.startsWith('http') 
+        ? selectedImage 
+        : 'paris';
 
-    const newTrip = await api.createTrip({
-      ...form,
-      image: imageToUse,
-      photos: [],
-    });
+      const newTrip = await api.createTrip({
+        title: form.title,
+        destination: form.destination,
+        startDate: formatDate(form.startDate),
+        endDate: formatDate(form.endDate),
+        description: form.description,
+        image: imageToUse,
+        photos: [],
+      });
 
-    console.log('✅ Trip created:', newTrip);
-
-    Alert.alert('Succès', 'Voyage créé avec succès!', [
-      { 
-        text: 'OK', 
-        onPress: () => {
-          router.back();
-          setTimeout(() => {
-            router.push('/trips');
-          }, 100);
-        }
-      },
-    ]);
-  } catch (error: any) {
-    console.error('❌ Error creating trip:', error);
-    Alert.alert('Erreur', error.message || 'Impossible de créer le voyage');
-  } finally {
-    setIsLoading(false);
-  }
-};
+      Alert.alert(t('common.success'), t('addTrip.success'), [
+        { 
+          text: 'OK', 
+          onPress: () => {
+            router.back();
+            setTimeout(() => {
+              router.push('/trips');
+            }, 100);
+          }
+        },
+      ]);
+    } catch (error: any) {
+      Alert.alert(t('common.error'), error.message || t('addTrip.error'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -114,7 +133,7 @@ const handleSubmit = async () => {
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
             <Ionicons name="close" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Nouveau Voyage</Text>
+          <Text style={styles.headerTitle}>{t('addTrip.title')}</Text>
           <View style={styles.placeholder} />
         </View>
       </LinearGradient>
@@ -122,52 +141,87 @@ const handleSubmit = async () => {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.form}>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Titre *</Text>
+            <Text style={styles.label}>{t('addTrip.form.title')} *</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ex: Voyage à Paris"
+              placeholder={t('addTrip.form.titlePlaceholder')}
               value={form.title}
               onChangeText={(text) => setForm({ ...form, title: text })}
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Destination *</Text>
+            <Text style={styles.label}>{t('addTrip.form.destination')} *</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ex: Paris, France"
+              placeholder={t('addTrip.form.destinationPlaceholder')}
               value={form.destination}
               onChangeText={(text) => setForm({ ...form, destination: text })}
             />
           </View>
 
           <View style={styles.row}>
+            {/* Date de début */}
             <View style={[styles.inputGroup, styles.halfWidth]}>
-  <Text style={styles.label}>Date début *</Text>
-  <TextInput
-    style={styles.input}
-    placeholder="2026-01-22"  // ✅ Format correct
-    value={form.startDate}
-    onChangeText={(text) => setForm({ ...form, startDate: text })}
-  />
-</View>
+              <Text style={styles.label}>{t('addTrip.form.startDate')} *</Text>
+              <TouchableOpacity
+                style={styles.dateButton}
+                onPress={() => setShowStartDatePicker(true)}
+              >
+                <Ionicons name="calendar-outline" size={20} color="#6b7280" />
+                <Text style={styles.dateButtonText}>
+                  {formatDisplayDate(form.startDate)}
+                </Text>
+              </TouchableOpacity>
+              {showStartDatePicker && (
+                <DateTimePicker
+                  value={form.startDate}
+                  mode="date"
+                  display="default"
+                  onChange={(event, selectedDate) => {
+                    setShowStartDatePicker(false);
+                    if (selectedDate) {
+                      setForm({ ...form, startDate: selectedDate });
+                    }
+                  }}
+                />
+              )}
+            </View>
 
-<View style={[styles.inputGroup, styles.halfWidth]}>
-  <Text style={styles.label}>Date fin *</Text>
-  <TextInput
-    style={styles.input}
-    placeholder="2026-01-30"  // ✅ Format correct
-    value={form.endDate}
-    onChangeText={(text) => setForm({ ...form, endDate: text })}
-  />
-</View>
+            {/* Date de fin */}
+            <View style={[styles.inputGroup, styles.halfWidth]}>
+              <Text style={styles.label}>{t('addTrip.form.endDate')} *</Text>
+              <TouchableOpacity
+                style={styles.dateButton}
+                onPress={() => setShowEndDatePicker(true)}
+              >
+                <Ionicons name="calendar-outline" size={20} color="#6b7280" />
+                <Text style={styles.dateButtonText}>
+                  {formatDisplayDate(form.endDate)}
+                </Text>
+              </TouchableOpacity>
+              {showEndDatePicker && (
+                <DateTimePicker
+                  value={form.endDate}
+                  mode="date"
+                  display="default"
+                  minimumDate={form.startDate}
+                  onChange={(event, selectedDate) => {
+                    setShowEndDatePicker(false);
+                    if (selectedDate) {
+                      setForm({ ...form, endDate: selectedDate });
+                    }
+                  }}
+                />
+              )}
+            </View>
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Description</Text>
+            <Text style={styles.label}>{t('addTrip.form.description')}</Text>
             <TextInput
               style={[styles.input, styles.textArea]}
-              placeholder="Décrivez votre voyage..."
+              placeholder={t('addTrip.form.descriptionPlaceholder')}
               value={form.description}
               onChangeText={(text) => setForm({ ...form, description: text })}
               multiline
@@ -176,14 +230,14 @@ const handleSubmit = async () => {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Photo de couverture</Text>
+            <Text style={styles.label}>{t('addTrip.form.coverPhoto')}</Text>
             {selectedImage && (
               <Image source={{ uri: selectedImage }} style={styles.imagePreview} />
             )}
             <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
               <Ionicons name="image-outline" size={24} color="#a855f7" />
               <Text style={styles.imageButtonText}>
-                {selectedImage ? 'Changer la photo' : 'Ajouter une photo'}
+                {selectedImage ? t('addTrip.form.changePhoto') : t('addTrip.form.addPhoto')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -201,7 +255,7 @@ const handleSubmit = async () => {
           ) : (
             <>
               <Ionicons name="checkmark-circle-outline" size={24} color="#fff" />
-              <Text style={styles.submitButtonText}>Créer le voyage</Text>
+              <Text style={styles.submitButtonText}>{t('addTrip.actions.create')}</Text>
             </>
           )}
         </TouchableOpacity>
@@ -277,6 +331,21 @@ const styles = StyleSheet.create({
   },
   halfWidth: {
     flex: 1,
+  },
+  dateButton: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  dateButtonText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#111827',
   },
   imagePreview: {
     width: '100%',

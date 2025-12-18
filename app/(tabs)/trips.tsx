@@ -5,19 +5,25 @@ import { useState } from 'react';
 import { ActivityIndicator, Image, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { IMAGES_SOURCES } from '.';
+import { useTranslation } from 'react-i18next';
 
 export default function TripsScreen() {
   const router = useRouter();
-  const { trips, isLoading, isRefreshing, refreshTrips } = useTrips();
+  const { t } = useTranslation();
+  const { trips, isLoading, isRefreshing, refreshTrips, toggleFavorite } = useTrips();
   const [selectedTab, setSelectedTab] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const tabs = ['All', 'Upcoming', 'Past', 'Favorites'];
+  const tabs = [
+    { key: 'All', label: t('trips.tabs.all') },
+    { key: 'Upcoming', label: t('trips.tabs.upcoming') },
+    { key: 'Past', label: t('trips.tabs.past') },
+    { key: 'Favorites', label: t('trips.tabs.favorites') }
+  ];
 
   const filterTrips = () => {
     let filtered = trips;
 
-    // Filtre par onglet
     const now = new Date();
     if (selectedTab === 'Upcoming') {
       filtered = filtered.filter(trip => new Date(trip.startDate) > now);
@@ -27,7 +33,6 @@ export default function TripsScreen() {
       filtered = filtered.filter(trip => trip.isFavorite);
     }
 
-    // Filtre par recherche
     if (searchQuery.trim()) {
       filtered = filtered.filter(trip =>
         trip.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -40,12 +45,17 @@ export default function TripsScreen() {
 
   const filteredTrips = filterTrips();
 
+  const handleToggleFavorite = async (tripId: string, event: any) => {
+    event.stopPropagation();
+    await toggleFavorite(tripId);
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#a855f7" />
-          <Text style={styles.loadingText}>Chargement des voyages...</Text>
+          <Text style={styles.loadingText}>{t('common.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -55,7 +65,7 @@ export default function TripsScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.HeaderTitle}>My Trips</Text>
+        <Text style={styles.HeaderTitle}>{t('trips.title')}</Text>
 
         {/* Search Bar */}
         <View style={styles.searchBarContainer}>
@@ -63,7 +73,7 @@ export default function TripsScreen() {
             <Ionicons name="search" size={20} color="#9ca3af" />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search trips"
+              placeholder={t('trips.searchPlaceholder')}
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
@@ -95,12 +105,12 @@ export default function TripsScreen() {
         >
           {tabs.map((tab) => (
             <TouchableOpacity
-              key={tab}
-              style={[styles.tab, selectedTab === tab && styles.tabActive]}
-              onPress={() => setSelectedTab(tab)}
+              key={tab.key}
+              style={[styles.tab, selectedTab === tab.key && styles.tabActive]}
+              onPress={() => setSelectedTab(tab.key)}
             >
-              <Text style={[styles.tabText, selectedTab === tab && styles.tabTextActive]}>
-                {tab}
+              <Text style={[styles.tabText, selectedTab === tab.key && styles.tabTextActive]}>
+                {tab.label}
               </Text>
             </TouchableOpacity>
           ))}
@@ -113,17 +123,17 @@ export default function TripsScreen() {
               <Ionicons name="airplane-outline" size={64} color="#9ca3af" />
               <Text style={styles.emptyStateText}>
                 {searchQuery
-                  ? 'Aucun voyage trouvé'
+                  ? t('trips.empty.noTrips')
                   : selectedTab === 'Favorites'
-                  ? 'Aucun voyage favori'
-                  : 'Aucun voyage dans cette catégorie'}
+                  ? t('trips.empty.noFavorites')
+                  : t('trips.empty.noCategory')}
               </Text>
               {selectedTab === 'All' && !searchQuery && (
                 <TouchableOpacity
                   style={styles.addTripButton}
                   onPress={() => router.push('/modal/add-trip')}
                 >
-                  <Text style={styles.addTripButtonText}>Créer un voyage</Text>
+                  <Text style={styles.addTripButtonText}>{t('trips.empty.createTrip')}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -133,9 +143,9 @@ export default function TripsScreen() {
                 key={trip.id}
                 style={styles.tripCard}
                 onPress={() => router.push({
-  pathname: '/trip/[id]',
-  params: { id: trip.id }
-})}
+                  pathname: '/trip/[id]',
+                  params: { id: trip.id }
+                })}
               >
                 {/* Image */}
                 <View style={styles.tripImageContainer}>
@@ -151,11 +161,17 @@ export default function TripsScreen() {
                   <View style={styles.tripImageOverlay} />
                   
                   {/* Favorite Badge */}
-                  {trip.isFavorite && (
-                    <View style={styles.favoriteBadge}>
-                      <Ionicons name="heart" size={16} color="#ef4444" />
-                    </View>
-                  )}
+                  <TouchableOpacity 
+                    style={styles.favoriteBadge}
+                    onPress={(e) => handleToggleFavorite(trip.id, e)}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons 
+                      name={trip.isFavorite ? "heart" : "heart-outline"} 
+                      size={20} 
+                      color={trip.isFavorite ? "#ef4444" : "#6b7280"} 
+                    />
+                  </TouchableOpacity>
 
                   <View style={styles.tripImageContent}>
                     <Text style={styles.tripCardTitle}>{trip.title}</Text>
@@ -346,12 +362,17 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 12,
     right: 12,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
   },
   tripImageContent: {
     position: 'absolute',

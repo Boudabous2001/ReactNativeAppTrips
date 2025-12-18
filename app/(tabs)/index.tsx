@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 export const IMAGES_SOURCES = {
   paris: require('@/assets/images/paris.jpeg'),
@@ -16,14 +17,15 @@ export const IMAGES_SOURCES = {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { trips, isLoading, refreshTrips, isRefreshing } = useTrips();
 
   // Calculer les stats depuis les vraies données
   const stats = [
-    { label: 'Trips', value: trips.length, icon: 'airplane-outline' },
-    { label: 'Photos', value: trips.reduce((acc, trip) => acc + (trip.photos?.length || 0), 0), icon: 'camera-outline' },
-    { label: 'Countries', value: new Set(trips.map(t => t.destination.split(',')[1]?.trim())).size, icon: 'globe-outline' },
+    { label: t('home.trips'), value: trips.length, icon: 'airplane-outline' },
+    { label: t('home.photos'), value: trips.reduce((acc, trip) => acc + (trip.photos?.length || 0), 0), icon: 'camera-outline' },
+    { label: t('home.countries'), value: new Set(trips.map(t => t.destination.split(',')[1]?.trim())).size, icon: 'globe-outline' },
   ] as const;
 
   // Filtrer les voyages à venir
@@ -48,9 +50,9 @@ export default function HomeScreen() {
   };
 
   const activities = [
-    { icon: 'walk-outline', text: 'Went for a walk in the park', time: '2 hours ago' },
-    { icon: 'camera-outline', text: 'Added 5 new photos to "Summer Trip"', time: '1 day ago' },
-    { icon: 'airplane-outline', text: 'Booked a flight to New York', time: '3 days ago' },
+    { icon: 'walk-outline', text: t('home.activity1'), time: t('home.activity1Time') },
+    { icon: 'camera-outline', text: t('home.activity2'), time: t('home.activity2Time') },
+    { icon: 'airplane-outline', text: t('home.activity3'), time: t('home.activity3Time') },
   ] as const;
 
   if (isLoading) {
@@ -58,7 +60,7 @@ export default function HomeScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#a855f7" />
-          <Text style={styles.loadingText}>Chargement...</Text>
+          <Text style={styles.loadingText}>{t('common.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -76,8 +78,8 @@ export default function HomeScreen() {
         <LinearGradient colors={['#a855f7', '#ec4899']} style={styles.header}>
           <View style={styles.headerTop}>
             <View>
-              <Text style={styles.greentingText}>Hello</Text>
-              <Text style={styles.firstnameText}>{user?.name || 'Voyageur'}!</Text>
+              <Text style={styles.greentingText}>{t('home.hello')}</Text>
+              <Text style={styles.firstnameText}>{user?.name || t('home.traveler')}!</Text>
             </View>
             <TouchableOpacity 
               style={styles.notificationBtn}
@@ -104,9 +106,9 @@ export default function HomeScreen() {
           {/* Upcoming trips */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Upcoming Trips</Text>
+              <Text style={styles.sectionTitle}>{t('home.upcomingTrips')}</Text>
               <TouchableOpacity onPress={() => router.push('/trips')}>
-                <Text style={styles.homeSeeAllBtn}>See All</Text>
+                <Text style={styles.homeSeeAllBtn}>{t('home.seeAll')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -115,24 +117,24 @@ export default function HomeScreen() {
         {upcomingTrips.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="airplane-outline" size={64} color="#9ca3af" />
-            <Text style={styles.emptyStateText}>Aucun voyage à venir</Text>
+            <Text style={styles.emptyStateText}>{t('home.noUpcomingTrips')}</Text>
             <TouchableOpacity
               style={styles.addTripButton}
               onPress={() => router.push('/modal/add-trip')}
             >
-              <Text style={styles.addTripButtonText}>Créer un voyage</Text>
+              <Text style={styles.addTripButtonText}>{t('home.createTrip')}</Text>
             </TouchableOpacity>
           </View>
         ) : (
           upcomingTrips.map((trip) => (
-<TouchableOpacity 
-  key={trip.id} 
-  style={styles.tripCard}
-  onPress={() => router.push({
-    pathname: '/trip/[id]',
-    params: { id: trip.id }
-  })}
->
+            <TouchableOpacity 
+              key={trip.id} 
+              style={styles.tripCard}
+              onPress={() => router.push({
+                pathname: '/trip/[id]',
+                params: { id: trip.id }
+              })}
+            >
               <Image
                 source={
                   trip.image?.includes('http')
@@ -148,7 +150,9 @@ export default function HomeScreen() {
                   <Text style={styles.tripDateText}>{formatDateRange(trip.startDate, trip.endDate)}</Text>
                 </View>
                 <View style={styles.tripBadge}>
-                  <Text style={styles.tripBadgeText}>Dans {getDaysUntil(trip.startDate)} jours</Text>
+                  <Text style={styles.tripBadgeText}>
+                    {t('home.in')} {getDaysUntil(trip.startDate)} {t('home.days')}
+                  </Text>
                 </View>
               </View>
             </TouchableOpacity>
@@ -157,26 +161,26 @@ export default function HomeScreen() {
 
         {/* Quick Actions */}
         <View style={styles.section}>
-          <Text style={{ ...styles.sectionTitle, paddingHorizontal: 12 }}>Quick Actions</Text>
+          <Text style={{ ...styles.sectionTitle, paddingHorizontal: 12 }}>{t('home.quickActions')}</Text>
           <View style={styles.quickActionsGrid}>
             <TouchableOpacity onPress={() => router.push('/modal/add-trip')}>
               <LinearGradient colors={['#a855f7', '#ec4899']} style={styles.quickActionCard}>
                 <Ionicons name="add-circle-outline" size={24} color="#fff" />
-                <Text style={styles.quickActionLabel}>New Trip</Text>
+                <Text style={styles.quickActionLabel}>{t('home.newTrip')}</Text>
               </LinearGradient>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => router.push('/modal/add-trip')}>
               <LinearGradient colors={['#3b82f6', '#06b6d4']} style={styles.quickActionCard}>
                 <Ionicons name="camera-outline" size={24} color="#fff" />
-                <Text style={styles.quickActionLabel}>Add Photo</Text>
+                <Text style={styles.quickActionLabel}>{t('home.addPhoto')}</Text>
               </LinearGradient>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => router.push('/trips')}>
               <LinearGradient colors={['#10b981', '#059669']} style={styles.quickActionCard}>
                 <Ionicons name="map-outline" size={24} color="#fff" />
-                <Text style={styles.quickActionLabel}>Explore</Text>
+                <Text style={styles.quickActionLabel}>{t('home.explore')}</Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>
@@ -185,7 +189,7 @@ export default function HomeScreen() {
         {/* Recent Activity */}
         <View style={styles.section}>
           <View style={{ paddingHorizontal: 12 }}>
-            <Text style={{ ...styles.sectionTitle, paddingHorizontal: 12 }}>Recent Activity</Text>
+            <Text style={{ ...styles.sectionTitle, paddingHorizontal: 12 }}>{t('home.recentActivity')}</Text>
             {activities.map((activity, idx) => (
               <View style={styles.activityCard} key={idx}>
                 <Text style={styles.activityIcon}>
