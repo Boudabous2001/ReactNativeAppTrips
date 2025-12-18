@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 const TRIPS_FILE = path.join(__dirname, 'data', 'trips.json');
 
 // Ensure data directory exists
@@ -147,6 +147,7 @@ if (url.pathname.startsWith('/trips/') && url.pathname.endsWith('/favorite') && 
   res.end(JSON.stringify({ error: 'Not Found' }));
 });
 
-server.listen(PORT, () => {
-  console.log(`✅ Simple backend running on http://localhost:${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ Simple backend running on http://0.0.0.0:${PORT}`);
+  console.log(`📱 Mobile access: http://192.168.1.164:${PORT}`);
 });
